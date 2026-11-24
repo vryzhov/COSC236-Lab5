@@ -1,12 +1,29 @@
 package lab5;
 
-public class LibrarianController {
+public class LibrarianController { 
+	private BorrowingServiceAPI borrowingService; 
+	
+	private BookFactory paperBookFactory;
+	private BookFactory eBookFactory;
+	private BookFactory audioBookFactory;
 	
 	Library library; // Library dependency
 	
-	public LibrarianController( ) {
-		this.library = new Library(); // Constructor injection
+
+	public LibrarianController() {
+
+		// Initialize library
+		this.library = new Library();
+
+		// Use shared Singleton borrowing service
+		this.borrowingService = BorrowingService.getInstance();
+
+		// Initialize book factories
+		this.paperBookFactory = new PaperBookFactory();
+		this.eBookFactory = new EBookFactory();
+		this.audioBookFactory = new AudioBookFactory();
 	}
+
 	public Library getLibrary() {
 		return this.library;
 	}
@@ -16,11 +33,39 @@ public class LibrarianController {
 	public void showMembers() {
 		library.showMembers();
 	}
-	public void addBook(String title) {
-		library.addBook(new Book(title));  // Book class constructor dependency
+
+	// Add a traditional paper book using its factory
+	public void addPaperBook(String title) {
+	    addBook(paperBookFactory, title);
 	}
+
+	// Add an electronic book using its factory
+	public void addEBook(String title) {
+	    addBook(eBookFactory, title);
+	}
+
+	// Add an audio book using its factory
+	public void addAudioBook(String title) {
+	    addBook(audioBookFactory, title);
+	}
+
+	/**
+	 * General factory-based method.
+	 * Creates the appropriate book type based on the factory.
+	 */
+	public void addBook(BookFactory factory, String title) {
+
+		if (factory == null) {
+			throw new IllegalArgumentException(
+				"Unsupported book factory."
+			);
+		}
+		
+	    library.addBook(factory.createBook(title));
+	}
+
 	public void addMember(String name) {
-		library.addMember(new Member(name)); // Member class constructor dependency
+		library.addMember(new Member(name, borrowingService)); // Member class constructor dependency
 	}
 	public void removeBook(String title) {
 		library.removeBook(title); // remove 
